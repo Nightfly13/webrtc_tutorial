@@ -235,7 +235,6 @@ function changeVideoSource() {
     stream.getVideoTracks()[0].enabled = isVideo;
     peerConn.getSenders()[1].replaceTrack(stream.getVideoTracks()[0]);
   });
-  joinCall();
 }
 
 audioInputSelect.onchange = changeAudioSource;

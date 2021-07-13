@@ -222,7 +222,6 @@ function changeVideoSource() {
     stream.getVideoTracks()[0].enabled = isVideo;
     peerConn.getSenders()[1].replaceTrack(stream.getVideoTracks()[0]);
   });
-  startCall();
 }
 
 //initialize call
