@@ -221,6 +221,7 @@ function changeAudioSource() {
     audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
   };
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    stream.getAudioTracks()[0].enabled = isAudio;
     peerConn.getSenders()[0].replaceTrack(stream.getAudioTracks()[0]);
   });
 }
@@ -231,6 +232,7 @@ function changeVideoSource() {
     video: { deviceId: videoSource ? { exact: videoSource } : undefined },
   };
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    stream.getVideoTracks()[0].enabled = isVideo;
     peerConn.getSenders()[1].replaceTrack(stream.getVideoTracks()[0]);
   });
   joinCall();
