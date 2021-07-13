@@ -7,7 +7,6 @@ const videoSelect = document.querySelector("select#videoSource");
 const selectors = [audioInputSelect, audioOutputSelect, videoSelect];
 audioOutputSelect.disabled = !("sinkId" in HTMLMediaElement.prototype);
 let username;
-let localStream;
 let peerConn;
 let isAudio = true;
 let isVideo = true;
@@ -77,8 +76,7 @@ function createAndSendAnswer() {
   }
 //apply video source to call
 function gotStream(stream) {
-  localStream = stream;
-  document.getElementById("local-video").srcObject = localStream;
+  document.getElementById("local-video").srcObject = stream;
 
   let configuration = {
     iceServers: [
@@ -94,7 +92,7 @@ function gotStream(stream) {
   };
 
   peerConn = new RTCPeerConnection(configuration);
-  peerConn.addStream(localStream);
+  peerConn.addStream(stream);
 
   peerConn.onaddstream = (e) => {
     document.getElementById("remote-video").srcObject = e.stream;
