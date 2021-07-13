@@ -29,25 +29,25 @@ function handleSignallingData(data) {
   }
 }
 function createAndSendOffer() {
-    peerConn.createOffer(
-      (offer) => {
-        sendData({
-          type: "store_offer",
-          offer: offer,
-        });
-  
-        peerConn.setLocalDescription(offer);
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
-  }
+  peerConn.createOffer(
+    (offer) => {
+      sendData({
+        type: "store_offer",
+        offer: offer,
+      });
+
+      peerConn.setLocalDescription(offer);
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
+}
 function createAndSendAnswer() {
   peerConn.createAnswer(
     (answer) => {
       peerConn.setLocalDescription(answer);
-      console.log(answer)
+      console.log(answer);
       sendData({
         type: "send_answer",
         answer: answer,
@@ -161,11 +161,11 @@ function gotStream(stream) {
 }
 
 function joinCall() {
-    if (window.stream) {
-        window.stream.getTracks().forEach((track) => {
-          track.stop();
-        });
-      }
+  if (window.stream) {
+    window.stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+  }
   username = document.getElementById("username-input").value;
 
   document.getElementById("video-call-div").style.display = "inline";
