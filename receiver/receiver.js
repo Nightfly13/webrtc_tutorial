@@ -232,6 +232,7 @@ function changeVideoSource() {
     video: { deviceId: videoSource ? { exact: videoSource } : undefined },
   };
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    document.getElementById("local-video").srcObject = stream;
     stream.getVideoTracks()[0].enabled = isVideo;
     peerConn.getSenders()[1].replaceTrack(stream.getVideoTracks()[0]);
   });
