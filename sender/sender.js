@@ -118,12 +118,18 @@ function gotStream(stream) {
 //Mute functions for video and audio
 function muteAudio() {
   isAudio = !isAudio;
-  localStream.getAudioTracks()[0].enabled = isAudio;
+  peerConn.getSenders()[0].track.enabled = isAudio;
+  document.getElementById("muteAudio").style.backgroundColor = isAudio
+    ? "green"
+    : "red";
 }
 
 function muteVideo() {
   isVideo = !isVideo;
-  localStream.getVideoTracks()[0].enabled = isVideo;
+  peerConn.getSenders()[1].track.enabled = isVideo;
+  document.getElementById("muteVideo").style.backgroundColor = isVideo
+    ? "green"
+    : "red";
 }
 
 //handle device selector
