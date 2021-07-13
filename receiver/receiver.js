@@ -7,7 +7,6 @@ const videoSelect = document.querySelector("select#videoSource");
 const selectors = [audioInputSelect, audioOutputSelect, videoSelect];
 audioOutputSelect.disabled = !("sinkId" in HTMLMediaElement.prototype);
 let username;
-let localStream;
 let peerConn;
 let isAudio = true;
 let isVideo = true;
@@ -30,25 +29,25 @@ function handleSignallingData(data) {
   }
 }
 function createAndSendOffer() {
-    peerConn.createOffer(
-      (offer) => {
-        sendData({
-          type: "store_offer",
-          offer: offer,
-        });
-  
-        peerConn.setLocalDescription(offer);
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
-  }
+  peerConn.createOffer(
+    (offer) => {
+      sendData({
+        type: "store_offer",
+        offer: offer,
+      });
+
+      peerConn.setLocalDescription(offer);
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
+}
 function createAndSendAnswer() {
   peerConn.createAnswer(
     (answer) => {
       peerConn.setLocalDescription(answer);
-      console.log(answer)
+      console.log(answer);
       sendData({
         type: "send_answer",
         answer: answer,
@@ -106,19 +105,22 @@ function gotDevices(deviceInfos) {
 
 function muteAudio() {
   isAudio = !isAudio;
-
-  localStream.getAudioTracks()[0].enabled = isAudio;
+  peerConn.getSenders()[0].track.enabled = isAudio;
+  document.getElementById("muteAudio").style.backgroundColor = isAudio
+    ? "green"
+    : "red";
 }
 
 function muteVideo() {
   isVideo = !isVideo;
-
-  localStream.getVideoTracks()[0].enabled = isVideo;
+  peerConn.getSenders()[1].track.enabled = isVideo;
+  document.getElementById("muteVideo").style.backgroundColor = isVideo
+    ? "green"
+    : "red";
 }
 
 function gotStream(stream) {
-  localStream = stream;
-  document.getElementById("local-video").srcObject = localStream;
+  document.getElementById("local-video").srcObject = stream;
 
   let configuration = {
     iceServers: [
@@ -134,7 +136,7 @@ function gotStream(stream) {
   };
 
   peerConn = new RTCPeerConnection(configuration);
-  peerConn.addStream(localStream);
+  peerConn.addStream(stream);
 
   peerConn.onaddstream = (e) => {
     document.getElementById("remote-video").srcObject = e.stream;
@@ -159,11 +161,11 @@ function gotStream(stream) {
 }
 
 function joinCall() {
-    if (window.stream) {
-        window.stream.getTracks().forEach((track) => {
-          track.stop();
-        });
-      }
+  if (window.stream) {
+    window.stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+  }
   username = document.getElementById("username-input").value;
 
   document.getElementById("video-call-div").style.display = "inline";
@@ -219,6 +221,7 @@ function changeAudioSource() {
     audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
   };
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    stream.getAudioTracks()[0].enabled = isAudio;
     peerConn.getSenders()[0].replaceTrack(stream.getAudioTracks()[0]);
   });
 }
@@ -229,9 +232,10 @@ function changeVideoSource() {
     video: { deviceId: videoSource ? { exact: videoSource } : undefined },
   };
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    document.getElementById("local-video").srcObject = stream;
+    stream.getVideoTracks()[0].enabled = isVideo;
     peerConn.getSenders()[1].replaceTrack(stream.getVideoTracks()[0]);
   });
-  joinCall();
 }
 
 audioInputSelect.onchange = changeAudioSource;

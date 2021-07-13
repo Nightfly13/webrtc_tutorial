@@ -7,7 +7,6 @@ const videoSelect = document.querySelector("select#videoSource");
 const selectors = [audioInputSelect, audioOutputSelect, videoSelect];
 audioOutputSelect.disabled = !("sinkId" in HTMLMediaElement.prototype);
 let username;
-let localStream;
 let peerConn;
 let isAudio = true;
 let isVideo = true;
@@ -22,10 +21,10 @@ function handleSignallingData(data) {
     case "answer":
       peerConn.setRemoteDescription(data.answer);
       break;
-      case "offer":
-        peerConn.setRemoteDescription(data.offer);
-        createAndSendAnswer();
-        break;
+    case "offer":
+      peerConn.setRemoteDescription(data.offer);
+      createAndSendAnswer();
+      break;
     case "candidate":
       peerConn.addIceCandidate(data.candidate);
   }
@@ -61,24 +60,23 @@ function createAndSendOffer() {
 }
 
 function createAndSendAnswer() {
-    peerConn.createAnswer(
-      (answer) => {
-        peerConn.setLocalDescription(answer);
-        console.log(answer)
-        sendData({
-          type: "send_answer",
-          answer: answer,
-        });
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
-  }
+  peerConn.createAnswer(
+    (answer) => {
+      peerConn.setLocalDescription(answer);
+      console.log(answer);
+      sendData({
+        type: "send_answer",
+        answer: answer,
+      });
+    },
+    (error) => {
+      console.log(error);
+    }
+  );
+}
 //apply video source to call
 function gotStream(stream) {
-  localStream = stream;
-  document.getElementById("local-video").srcObject = localStream;
+  document.getElementById("local-video").srcObject = stream;
 
   let configuration = {
     iceServers: [
@@ -94,7 +92,7 @@ function gotStream(stream) {
   };
 
   peerConn = new RTCPeerConnection(configuration);
-  peerConn.addStream(localStream);
+  peerConn.addStream(stream);
 
   peerConn.onaddstream = (e) => {
     document.getElementById("remote-video").srcObject = e.stream;
@@ -118,12 +116,18 @@ function gotStream(stream) {
 //Mute functions for video and audio
 function muteAudio() {
   isAudio = !isAudio;
-  localStream.getAudioTracks()[0].enabled = isAudio;
+  peerConn.getSenders()[0].track.enabled = isAudio;
+  document.getElementById("muteAudio").style.backgroundColor = isAudio
+    ? "green"
+    : "red";
 }
 
 function muteVideo() {
   isVideo = !isVideo;
-  localStream.getVideoTracks()[0].enabled = isVideo;
+  peerConn.getSenders()[1].track.enabled = isVideo;
+  document.getElementById("muteVideo").style.backgroundColor = isVideo
+    ? "green"
+    : "red";
 }
 
 //handle device selector
@@ -180,7 +184,9 @@ function changeAudioDestination() {
     videoElement
       .setSinkId(audioDestination)
       .then(() => {
-        console.log(`Success, audio output device attached: ${audioDestination}`);
+        console.log(
+          `Success, audio output device attached: ${audioDestination}`
+        );
       })
       .catch((error) => {
         let errorMessage = error;
@@ -202,6 +208,7 @@ function changeAudioSource() {
     audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
   };
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    stream.getAudioTracks()[0].enabled = isAudio;
     peerConn.getSenders()[0].replaceTrack(stream.getAudioTracks()[0]);
   });
 }
@@ -212,31 +219,32 @@ function changeVideoSource() {
     video: { deviceId: videoSource ? { exact: videoSource } : undefined },
   };
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    document.getElementById("local-video").srcObject = stream;
+    stream.getVideoTracks()[0].enabled = isVideo;
     peerConn.getSenders()[1].replaceTrack(stream.getVideoTracks()[0]);
   });
-  startCall();
 }
 
 //initialize call
 function startCall() {
-    if (window.stream) {
-      window.stream.getTracks().forEach((track) => {
-        track.stop();
-      });
-    }
-    document.getElementById("video-call-div").style.display = "inline";
-    const audioSource = audioInputSelect.value;
-    const videoSource = videoSelect.value;
-    const constraints = {
-      audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
-      video: { deviceId: videoSource ? { exact: videoSource } : undefined },
-    };
-    navigator.mediaDevices
-      .getUserMedia(constraints)
-      .then(gotStream)
-      .then(gotDevices)
-      .catch(handleError);
+  if (window.stream) {
+    window.stream.getTracks().forEach((track) => {
+      track.stop();
+    });
   }
+  document.getElementById("video-call-div").style.display = "inline";
+  const audioSource = audioInputSelect.value;
+  const videoSource = videoSelect.value;
+  const constraints = {
+    audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
+    video: { deviceId: videoSource ? { exact: videoSource } : undefined },
+  };
+  navigator.mediaDevices
+    .getUserMedia(constraints)
+    .then(gotStream)
+    .then(gotDevices)
+    .catch(handleError);
+}
 
 audioInputSelect.onchange = changeAudioSource;
 audioOutputSelect.onchange = changeAudioDestination;
