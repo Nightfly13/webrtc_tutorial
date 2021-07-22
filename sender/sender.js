@@ -1,4 +1,4 @@
-const webSocket = new WebSocket("ws://127.0.0.1:3000");
+const webSocket = new WebSocket("ws://https://webrtc-tutorial-tau.vercel.app/server.js");
 
 const videoElement = document.querySelector("video#remote-video");
 const audioInputSelect = document.querySelector("select#audioSource");
