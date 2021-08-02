@@ -1,0 +1,26 @@
+{
+  "name": "webrtc_tutorial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "websocket": "^1.0.34",
+    "ws": "^8.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nightfly13/webrtc_tutorial.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nightfly13/webrtc_tutorial/issues"
+  },
+  "homepage": "https://github.com/Nightfly13/webrtc_tutorial#readme"
+}
