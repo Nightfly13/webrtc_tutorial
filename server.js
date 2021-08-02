@@ -14,6 +14,10 @@ const webSocket = new Socket({httpServer: server})
 
 let users = []
 
+app.get('/', (req,res) => {
+    res.send("AAAAAAAAAAAAAAAAH")
+})
+
 webSocket.on('request', (req)=> {
     const connection = req.accept()
 
