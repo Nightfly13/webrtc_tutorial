@@ -1,7 +1,9 @@
 const Socket = require("websocket").server  
-const http = require("http")
+const express = require("express");
+const http = require("http");
+const app = express();
 
-const server = http.createServer((req, res)=> {})
+const server = http.createServer(app)
 
 const port = process.env.port || 3000;
 server.listen(port, () => {
@@ -17,7 +19,7 @@ webSocket.on('request', (req)=> {
 
     connection.on('message', (message)=> {
         const data = JSON.parse(message.utf8Data)
-        
+        console.log(data)
         const user = findUser(data.username)
 
         switch(data.type) {
